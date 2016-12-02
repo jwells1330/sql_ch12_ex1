@@ -15,17 +15,14 @@ public class SqlGatewayServlet extends HttpServlet {
 
         String sqlStatement = request.getParameter("sqlStatement");
         String sqlResult = "";
+        
+        ConnectionPool pool = ConnectionPool.getInstance();
+        Connection connection = pool.getConnection();
+        
         try {
             // load the driver
             Class.forName("com.mysql.jdbc.Driver");
             
-            // get a connection
-            String dbURL = "jdbc:mysql://localhost:3306/murach";
-            String username = "murach_user";
-            String password = "sesame";
-            Connection connection = DriverManager.getConnection(
-                    dbURL, username, password);
-
             // create a statement
             Statement statement = connection.createStatement();
 
@@ -59,6 +56,8 @@ public class SqlGatewayServlet extends HttpServlet {
         } catch (SQLException e) {
             sqlResult = "<p>Error executing the SQL statement: <br>"
                     + e.getMessage() + "</p>";
+        }finally{
+            pool.freeConnection(connection);
         }
 
         HttpSession session = request.getSession();
